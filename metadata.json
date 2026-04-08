@@ -3,8 +3,6 @@
   "description": "search on google lens from the gnome screenshot tool directly.",
   "uuid": "google-lens-search@SamkitJain660.github.io",
   "shell-version": [
-    "45",
-    "46",
     "49",
     "50"
   ],
