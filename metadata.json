@@ -1,0 +1,13 @@
+{
+  "name": "Gnome Google Lens",
+  "description": "search on google lens from the gnome screenshot tool directly.",
+  "uuid": "google-lens-search@SamkitJain660.github.io",
+  "shell-version": [
+    "45",
+    "46",
+    "49",
+    "50"
+  ],
+  "url": "https://github.com/SamkitJain660/add_to_google_lens",
+  "version": 1
+}
