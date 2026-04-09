@@ -9,7 +9,7 @@ import { LensUploader } from './uploader.js';
 
 export default class GoogleLensExtension extends Extension {
     enable() {
-        this._uploader = new LensUploader();
+        this._uploader = new LensUploader(this.path);
         this._injectLensButton();
     }
 

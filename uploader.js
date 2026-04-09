@@ -1,57 +1,105 @@
-import Soup from 'gi://Soup?version=3.0';
 import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
 
 export class LensUploader {
-    constructor() {
-        this._session = new Soup.Session();
-        this._session.timeout = 15;
-        this._session.user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0';
+    constructor(extensionPath = null) {
+        this._extensionPath = extensionPath;
     }
 
     async upload(filePath) {
         const file = Gio.File.new_for_path(filePath);
+
         const contents = await new Promise((resolve, reject) => {
-            file.load_contents_async(null, (obj, res) => {
-                const [success, bytes] = file.load_contents_finish(res);
-                success ? resolve(bytes) : reject(new Error('Read failed'));
+            file.load_contents_async(null, (_obj, res) => {
+                try {
+                    const [success, bytes] = file.load_contents_finish(res);
+                    if (!success) {
+                        reject(new Error('Read failed'));
+                        return;
+                    }
+
+                    resolve(bytes);
+                } catch (e) {
+                    reject(e);
+                }
             });
         });
-        
-        // Upload to a temporary image host (uguu.se)
-        // This is necessary to avoid Google Lens session / cookie mismatch errors when
-        // trying to anonymously upload directly from the extension to Lens.
-        const multipart = new Soup.Multipart(Soup.FORM_MIME_TYPE_MULTIPART);
-        multipart.append_form_file('files[]', 'screenshot.png', 'image/png', new GLib.Bytes(contents));
-        
-        const message = Soup.Message.new_from_multipart('https://uguu.se/upload', multipart);
-        
+
         try {
-            const bytes = await this._session.send_and_read_async(message, GLib.PRIORITY_DEFAULT, null);
-            
-            if (message.get_status() === Soup.Status.OK) {
-                // Parse the response
-                const decoder = new TextDecoder('utf-8');
-                const responseText = decoder.decode(bytes.toArray());
-                const responseJson = JSON.parse(responseText);
-                
-                if (responseJson && responseJson.success && responseJson.files && responseJson.files.length > 0) {
-                    const imageUrl = responseJson.files[0].url;
-                    
-                    // Open Google Lens with the uploaded public image URL
-                    const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(imageUrl)}`;
-                    Gio.AppInfo.launch_default_for_uri(lensUrl, null);
-                } else {
-                    throw new Error('Unexpected response format from uguu.se');
-                }
-            } else {
-                throw new Error(`Status code ${message.get_status()}`);
-            }
+            const guessedType = Gio.content_type_guess(filePath, contents)[0];
+            const mimeType = Gio.content_type_get_mime_type(guessedType) ?? 'application/octet-stream';
+            const imageDataUrl = `data:${mimeType};base64,${GLib.base64_encode(contents)}`;
+
+            const launcherPath = GLib.build_filenamev([
+                GLib.get_tmp_dir(),
+                `lens_upload_${GLib.uuid_string_random()}.html`,
+            ]);
+
+            const launcherHtml = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Google Lens Upload</title>
+</head>
+<body style="margin:0;min-height:100vh;display:grid;place-items:center;font-family:sans-serif;background:#f6f7fb;color:#202124;">
+  <div id="status">Uploading to Google Lens...</div>
+  <script>
+    (async () => {
+      try {
+        const imageDataUrl = ${JSON.stringify(imageDataUrl)};
+
+        const container = document.createElement("div");
+        container.style.display = "none";
+        document.body.appendChild(container);
+
+        const form = document.createElement("form");
+        form.action = \`https://lens.google.com/v3/upload?ep=ccm&s=&st=\${Date.now()}\`;
+        form.method = "POST";
+        form.enctype = "multipart/form-data";
+        container.appendChild(form);
+
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.name = "encoded_image";
+        form.appendChild(fileInput);
+
+        const dimensionsInput = document.createElement("input");
+        dimensionsInput.type = "text";
+        dimensionsInput.name = "processed_image_dimensions";
+        dimensionsInput.value = "1000,1000";
+        form.appendChild(dimensionsInput);
+
+        const result = await fetch(imageDataUrl);
+        const blob = await result.blob();
+        const dataTransfer = new DataTransfer();
+        const fileObject = new File([blob], "image", { type: blob.type || "application/octet-stream" });
+        dataTransfer.items.add(fileObject);
+        fileInput.files = dataTransfer.files;
+
+        form.submit();
+        container.remove();
+      } catch (error) {
+        document.getElementById("status").textContent = error.message;
+      }
+    })();
+  </script>
+</body>
+</html>`;
+
+            GLib.file_set_contents(launcherPath, launcherHtml);
+
+            const launcherFile = Gio.File.new_for_path(launcherPath);
+            Gio.AppInfo.launch_default_for_uri(launcherFile.get_uri(), null);
+
+            GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 60, () => {
+                file.delete_async(GLib.PRIORITY_DEFAULT, null, () => {});
+                launcherFile.delete_async(GLib.PRIORITY_DEFAULT, null, () => {});
+                return GLib.SOURCE_REMOVE;
+            });
         } catch (e) {
             console.error(`Google Lens upload failed: ${e.message}`);
             throw e;
-        } finally {
-            file.delete_async(GLib.PRIORITY_DEFAULT, null, () => {});
         }
     }
 }
