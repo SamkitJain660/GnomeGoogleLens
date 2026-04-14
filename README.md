@@ -7,7 +7,7 @@ Image search on Google Lens and OCR directly from the built-in GNOME Screenshot 
 ## Installation
 
 ### Dependency
-Install **Tesseract OCR** before proceeding:
+Install **Tesseract OCR** before proceeding (if you wish to use OCR):
 ```bash
 # Arch
 sudo pacman -S tesseract tesseract-data-eng
