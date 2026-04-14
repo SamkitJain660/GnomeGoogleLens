@@ -53,10 +53,12 @@ export default class ShotzyExtension extends Extension {
                     ui._panel.add_child(ui._bottomRowContainer);
                 }
             }
+            this._lensInnerVBox?.destroy();
+            this._lensInnerVBox = null;
+            this._lensSideBox?.destroy();
+            this._lensSideBox = null;
             this._lensWrapper.destroy();
             this._lensWrapper = null;
-            this._lensInnerVBox = null;
-            this._lensSideBox = null;
         }
 
         if (this._lensButton) {

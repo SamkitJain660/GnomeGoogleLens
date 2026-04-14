@@ -135,6 +135,12 @@ export class ScreenshotOCRController {
         }
 
         if (this._hitboxLayer) {
+            this._copyMenu?.destroy();
+            this._copyMenu = null;
+            this._copyButton?.destroy();
+            this._copyButton = null;
+            this._searchButton?.destroy();
+            this._searchButton = null;
             this._hitboxLayer.destroy();
             this._hitboxLayer = null;
         }
