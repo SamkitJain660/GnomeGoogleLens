@@ -2,7 +2,7 @@
 
 Image search on Google Lens and OCR directly from the built-in GNOME Screenshot tool.
 
-[![Watch demo](./thumbnail.png)](https://github.com/user-attachments/assets/90a6394f-106a-43af-aaf4-62a27cb8a25f)
+[![Watch demo]()](https://github.com/user-attachments/assets/90a6394f-106a-43af-aaf4-62a27cb8a25f)
 ## Features
 * **Google Lens Integration**: One-click upload of any screenshot selection to Google Lens.
 * **Smart OCR Overlay**: Automatically detects and highlights text in your screenshots.
