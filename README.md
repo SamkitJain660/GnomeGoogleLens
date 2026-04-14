@@ -15,7 +15,3 @@ Image search on Google Lens and OCR directly from the built-in GNOME Screenshot 
 3. Restart GNOME Shell (or log out and back in).
 4. Enable the extension using Extensions app or:
    `gnome-extensions enable shotzy@SamkitJain660.github.io`
-
-## Configuration
-Access settings via the Extensions app or:
-`gnome-extensions prefs shotzy@SamkitJain660.github.io`
