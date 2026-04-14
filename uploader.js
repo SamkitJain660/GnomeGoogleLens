@@ -32,7 +32,7 @@ export class LensUploader {
 
             const launcherPath = GLib.build_filenamev([
                 GLib.get_tmp_dir(),
-                `lens_upload_${GLib.uuid_string_random()}.html`,
+                `shotzy_upload_${GLib.uuid_string_random()}.html`,
             ]);
 
             const launcherHtml = `<!doctype html>
@@ -40,7 +40,7 @@ export class LensUploader {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Google Lens Upload</title>
+  <title>Shotzy Upload</title>
 </head>
 <body style="margin:0;min-height:100vh;display:grid;place-items:center;font-family:sans-serif;background:#f6f7fb;color:#202124;">
   <div id="status">Uploading to Google Lens...</div>
@@ -98,7 +98,7 @@ export class LensUploader {
                 return GLib.SOURCE_REMOVE;
             });
         } catch (e) {
-            console.error(`Google Lens upload failed: ${e.message}`);
+            console.error(`Shotzy upload failed: ${e.message}`);
             throw e;
         }
     }

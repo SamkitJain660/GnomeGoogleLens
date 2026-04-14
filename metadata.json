@@ -1,11 +1,12 @@
 {
-  "name": "Gnome Google Lens",
-  "description": "search on google lens from the gnome screenshot tool directly.",
-  "uuid": "google-lens-search@SamkitJain660.github.io",
+  "name": "Shotzy",
+  "description": "Google Lens Search and OCR features for the GNOME Screenshot tool.",
+  "uuid": "shotzy@SamkitJain660.github.io",
+  "settings-schema": "org.gnome.shell.extensions.shotzy",
   "shell-version": [
     "49",
     "50"
   ],
-  "url": "https://github.com/SamkitJain660/GnomeGoogleLens",
+  "url": "https://github.com/SamkitJain660/Shotzy",
   "version": 2
 }
