@@ -5,9 +5,8 @@ Image search on Google Lens and OCR directly from the built-in GNOME Screenshot 
 [![Watch demo]()](https://github.com/user-attachments/assets/90a6394f-106a-43af-aaf4-62a27cb8a25f)
 ## Features
 * **Google Lens Integration**: One-click upload of any screenshot selection to Google Lens.
-* **Smart OCR Overlay**: Automatically detects and highlights text in your screenshots.
-* **Copy & Search**: Click on highlighted text to copy it to your clipboard or search for it using your favorite search engine (Google, Bing, or DuckDuckGo).
-* **Fully Customizable**: Adjust highlight styles, colors, and OCR confidence in the settings.
+* **OCR Overlay**: Automatically detects and highlights text in your screenshots.
+* **Copy & Search**: Copy highlighted text to your clipboard or search it using your preferred search engine (Google, Bing, or DuckDuckGo).
 
 ## Installation
 1. Install Tesseract OCR: `sudo apt install tesseract-ocr` (or equivalent for your distro).
