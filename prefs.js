@@ -19,58 +19,22 @@ const DEFAULTS = {
 export default class ShotzyPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
+        const dependencyState = this._getDependencyState();
 
         window.set_default_size(720, 640);
-
-        const dependencyPage = new Adw.PreferencesPage({
-            title: 'Status',
-            icon_name: 'dialog-warning-symbolic',
-        });
-        window.add(dependencyPage);
-
-        const dependencyGroup = new Adw.PreferencesGroup({
-            title: 'Runtime Dependencies',
-            description: 'Shotzy depends on external tools for OCR and QR scanning.',
-        });
-        dependencyPage.add(dependencyGroup);
-
-        const missingDependencies = [
-            {
-                program: 'tesseract',
-                title: 'Tesseract is not installed',
-                subtitle: 'OCR highlighting will remain unavailable until the tesseract binary is installed.',
-            },
-            {
-                program: 'zbarimg',
-                title: 'zbarimg is not installed',
-                subtitle: 'QR scanning will remain unavailable until the zbarimg binary is installed.',
-            },
-        ].filter(item => !GLib.find_program_in_path(item.program));
-
-        if (missingDependencies.length === 0) {
-            dependencyGroup.add(new Adw.ActionRow({
-                title: 'All optional dependencies are available',
-                subtitle: 'OCR and QR features are ready to use.',
-            }));
-        } else {
-            for (const item of missingDependencies) {
-                const row = new Adw.ActionRow({
-                    title: item.title,
-                    subtitle: item.subtitle,
-                });
-                row.add_prefix(new Gtk.Image({
-                    icon_name: 'dialog-warning-symbolic',
-                    valign: Gtk.Align.CENTER,
-                }));
-                dependencyGroup.add(row);
-            }
-        }
 
         const stylePage = new Adw.PreferencesPage({
             title: 'Highlighting',
             icon_name: 'preferences-desktop-theme-symbolic',
         });
         window.add(stylePage);
+
+        const dependencyRow = this._createDependencyRow(dependencyState);
+        if (dependencyRow) {
+            const dependencyGroup = new Adw.PreferencesGroup();
+            dependencyGroup.add(dependencyRow);
+            stylePage.add(dependencyGroup);
+        }
 
         const styleGroup = new Adw.PreferencesGroup({
             title: 'Appearance',
@@ -185,6 +149,59 @@ export default class ShotzyPreferences extends ExtensionPreferences {
         searchGroup.add(searchEngineRow);
 
         window._settings = settings;
+    }
+
+    _getDependencyState() {
+        const dependencies = [
+            {
+                program: 'tesseract',
+            },
+            {
+                program: 'zbarimg',
+            },
+        ].map(item => ({
+            ...item,
+            available: Boolean(GLib.find_program_in_path(item.program)),
+        }));
+
+        return {
+            dependencies,
+            missing: dependencies.filter(item => !item.available),
+        };
+    }
+
+    _createDependencyRow({dependencies, missing}) {
+        if (missing.length === 0)
+            return null;
+
+        const missingFeatures = [];
+        if (missing.some(item => item.program === 'tesseract'))
+            missingFeatures.push('OCR highlighting');
+        if (missing.some(item => item.program === 'zbarimg'))
+            missingFeatures.push('QR scanning');
+
+        const tooltipLines = [
+            'Runtime Dependencies',
+            ...dependencies.map(item => `${item.program}: ${item.available ? 'Available' : 'Missing'}`),
+        ];
+
+        const row = new Adw.ActionRow({
+            title: `Optional tool missing: ${missing.map(item => item.program).join(', ')}`,
+            subtitle: `Install to enable ${missingFeatures.join(' and ')}.`,
+            tooltip_text: tooltipLines.join('\n'),
+        });
+        row.add_prefix(new Gtk.Image({
+            icon_name: 'dialog-warning-symbolic',
+            valign: Gtk.Align.CENTER,
+        }));
+
+        row.add_suffix(new Gtk.Image({
+            icon_name: 'help-about-symbolic',
+            tooltip_text: tooltipLines.join('\n'),
+            valign: Gtk.Align.CENTER,
+        }));
+
+        return row;
     }
 
     _createColorRow(settings, key, title) {
