@@ -39,4 +39,5 @@ gnome-extensions enable shotzy@SamkitJain660.github.io
 ---
 
 ### GNOME Extensions Portal
-> 🕐 Pending approval on [extensions.gnome.org](https://extensions.gnome.org)
+NOTE: current version on extension portal does not have QR scanning, that is under review for now.
+> https://extensions.gnome.org/extension/9707/shotzy/ 
