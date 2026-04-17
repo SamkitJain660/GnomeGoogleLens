@@ -1,6 +1,6 @@
 # Shotzy
 
-Image search on Google Lens and OCR directly from the built-in GNOME Screenshot tool.
+Image search on Google Lens, OCR and QR scan directly from the built-in GNOME Screenshot tool.
 
 [![Watch demo]()](https://github.com/user-attachments/assets/90a6394f-106a-43af-aaf4-62a27cb8a25f)
 
