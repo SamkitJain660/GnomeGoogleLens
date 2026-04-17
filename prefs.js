@@ -134,11 +134,11 @@ export default class ShotzyPreferences extends ExtensionPreferences {
             title: 'Search Engine',
             subtitle: 'Preferred engine for looking up OCR text.',
             model: new Gtk.StringList({
-                strings: ['Google', 'Bing', 'DuckDuckGo'],
+                strings: ['Google', 'Bing', 'DuckDuckGo', 'Kagi'],
             }),
         });
-        
-        const engines = ['google', 'bing', 'duckduckgo'];
+
+        const engines = ['google', 'bing', 'duckduckgo', 'kagi'];
         const currentEngine = settings.get_string('search-engine');
         searchEngineRow.selected = Math.max(0, engines.indexOf(currentEngine));
 
@@ -147,6 +147,26 @@ export default class ShotzyPreferences extends ExtensionPreferences {
         });
 
         searchGroup.add(searchEngineRow);
+
+        const actionsGroup = new Adw.PreferencesGroup({
+            title: 'Screenshot Actions',
+            description: 'Choose which extra buttons appear in the screenshot UI.',
+        });
+        searchPage.add(actionsGroup);
+
+        const lensButtonRow = new Adw.SwitchRow({
+            title: 'Show Google Lens button',
+            subtitle: 'Display the Google Lens upload button beside the screenshot controls.',
+        });
+        settings.bind('show-google-lens-button', lensButtonRow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        actionsGroup.add(lensButtonRow);
+
+        const qrButtonRow = new Adw.SwitchRow({
+            title: 'Show QR code button',
+            subtitle: 'Display the QR scanning button in the screenshot controls.',
+        });
+        settings.bind('show-qr-button', qrButtonRow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        actionsGroup.add(qrButtonRow);
 
         window._settings = settings;
     }

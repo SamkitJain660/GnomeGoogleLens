@@ -52,5 +52,15 @@
       <summary>Search engine</summary>
       <description>The search engine to use for the OCR 'Search' button.</description>
     </key>
+    <key name="show-google-lens-button" type="b">
+      <default>true</default>
+      <summary>Show Google Lens button</summary>
+      <description>Show the Google Lens button in the screenshot UI.</description>
+    </key>
+    <key name="show-qr-button" type="b">
+      <default>true</default>
+      <summary>Show QR code button</summary>
+      <description>Show the QR code button in the screenshot UI.</description>
+    </key>
   </schema>
 </schemalist>

@@ -88,8 +88,9 @@ class OCRHighlightOverlay extends St.DrawingArea {
 });
 
 export class ScreenshotOCRController {
-    constructor(settings = null) {
+    constructor(settings = null, showMessage = null) {
         this._settings = settings;
+        this._showMessage = showMessage;
         this._overlay = null;
         this._hitboxLayer = null;
         this._copyMenu = null;
@@ -557,7 +558,10 @@ export class ScreenshotOCRController {
         clipboard.set_text(St.ClipboardType.CLIPBOARD, this._activeBoxText);
         clipboard.set_text(St.ClipboardType.PRIMARY, this._activeBoxText);
         this._hideCopyMenu();
-        Main.notify('Shotzy OCR', 'Copied OCR text');
+        if (this._showMessage)
+            this._showMessage('copied OCR text');
+        else
+            Main.notify('Shotzy OCR', 'Copied OCR text');
     }
 
     _searchActiveBoxText() {
@@ -573,6 +577,9 @@ export class ScreenshotOCRController {
             break;
         case 'duckduckgo':
             url = `https://duckduckgo.com/?q=${query}`;
+            break;
+        case 'kagi':
+            url = `https://kagi.com/search?q=${query}`;
             break;
         case 'google':
         default:

@@ -69,9 +69,13 @@ export default class ShotzyExtension extends Extension {
     enable() {
         this._settings = this.getSettings();
         this._uploader = new LensUploader();
-        this._ocrController = new ScreenshotOCRController(this._settings);
+        this._ocrController = new ScreenshotOCRController(
+            this._settings,
+            text => this._showScreenshotMessage(text)
+        );
         this._lensButtonClickedId = 0;
         this._qrButtonClickedId = 0;
+        this._settingsChangedId = 0;
         this._uiOpenOriginal = null;
         this._areaSelectorUpdateOriginal = null;
         this._uiClosedId = 0;
@@ -82,6 +86,10 @@ export default class ShotzyExtension extends Extension {
 
         this._hookScreenshotUI();
         this._injectLensButton();
+        this._settingsChangedId = this._settings.connect('changed', (_settings, key) => {
+            if (key === 'show-google-lens-button' || key === 'show-qr-button')
+                this._syncActionButtons();
+        });
     }
 
     disable() {
@@ -144,6 +152,11 @@ export default class ShotzyExtension extends Extension {
         }
 
         this._destroyOverlayMessage();
+
+        if (this._settings && this._settingsChangedId) {
+            this._settings.disconnect(this._settingsChangedId);
+            this._settingsChangedId = 0;
+        }
 
         this._ocrController?.destroy();
         this._ocrController = null;
@@ -214,7 +227,6 @@ export default class ShotzyExtension extends Extension {
         const ui = Main.screenshotUI;
         if (!ui || !ui._panel || !ui._showPointerButtonContainer) return;
 
-        // 1. Lens button next to show pointer button (bottom row)
         if (!this._lensButton) {
             this._lensButton = new St.Button({
                 style_class: 'screenshot-ui-show-pointer-button',
@@ -258,7 +270,48 @@ export default class ShotzyExtension extends Extension {
             this._tooltips.push(qrTooltip);
         }
 
-        if (this._lensWrapper) return;
+        this._syncActionButtons();
+    }
+
+    _syncActionButtons() {
+        const ui = Main.screenshotUI;
+        if (!ui || !ui._panel || !ui._showPointerButtonContainer)
+            return;
+
+        this._ensureButtonsAttached(ui);
+
+        const showLensButton = this._settings?.get_boolean('show-google-lens-button') ?? true;
+        const showQrButton = this._settings?.get_boolean('show-qr-button') ?? true;
+
+        if (this._lensButton) {
+            this._lensButton.visible = showLensButton;
+            this._lensButton.reactive = showLensButton;
+            this._lensButton.can_focus = showLensButton;
+        }
+
+        if (this._qrButton) {
+            this._qrButton.visible = showQrButton;
+            this._qrButton.reactive = showQrButton;
+            this._qrButton.can_focus = showQrButton;
+        }
+
+        if (showQrButton)
+            this._ensureQrLayout(ui);
+        else
+            this._restoreDefaultLayout(ui);
+    }
+
+    _ensureButtonsAttached(ui) {
+        if (this._lensButton && this._lensButton.get_parent() !== ui._showPointerButtonContainer)
+            ui._showPointerButtonContainer.add_child(this._lensButton);
+
+        if (this._qrButton && this._lensSideBox && this._qrButton.get_parent() !== this._lensSideBox)
+            this._lensSideBox.add_child(this._qrButton);
+    }
+
+    _ensureQrLayout(ui) {
+        if (this._lensWrapper)
+            return;
 
         this._lensWrapper = new Clutter.Actor({
             layout_manager: new Clutter.BoxLayout({
@@ -282,7 +335,7 @@ export default class ShotzyExtension extends Extension {
 
         const typeContainer = ui._typeButtonContainer;
         const bottomContainer = ui._bottomRowContainer;
-        
+
         if (typeContainer && bottomContainer) {
             ui._panel.remove_child(typeContainer);
             ui._panel.remove_child(bottomContainer);
@@ -295,6 +348,40 @@ export default class ShotzyExtension extends Extension {
 
             ui._panel.add_child(this._lensWrapper);
         }
+    }
+
+    _restoreDefaultLayout(ui) {
+        if (!this._lensWrapper)
+            return;
+
+        if (ui._panel) {
+            ui._panel.remove_child(this._lensWrapper);
+
+            const typeContainer = ui._typeButtonContainer;
+            const bottomContainer = ui._bottomRowContainer;
+
+            if (typeContainer && bottomContainer) {
+                if (this._lensInnerVBox) {
+                    if (typeContainer.get_parent() === this._lensInnerVBox)
+                        this._lensInnerVBox.remove_child(typeContainer);
+                    if (bottomContainer.get_parent() === this._lensInnerVBox)
+                        this._lensInnerVBox.remove_child(bottomContainer);
+                }
+
+                ui._panel.add_child(typeContainer);
+                ui._panel.add_child(bottomContainer);
+            }
+        }
+
+        if (this._qrButton && this._lensSideBox && this._qrButton.get_parent() === this._lensSideBox)
+            this._lensSideBox.remove_child(this._qrButton);
+
+        this._lensInnerVBox?.destroy();
+        this._lensInnerVBox = null;
+        this._lensSideBox?.destroy();
+        this._lensSideBox = null;
+        this._lensWrapper.destroy();
+        this._lensWrapper = null;
     }
 
     async _handleLensClick() {
