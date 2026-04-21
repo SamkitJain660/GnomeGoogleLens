@@ -21,6 +21,12 @@ sudo apt install zbar-tools
 
 ---
 
+### GNOME Extensions Portal
+> https://extensions.gnome.org/extension/9707/shotzy/ 
+
+
+---
+
 ### Manual Install
 ```bash
 mkdir -p ~/.local/share/gnome-shell/extensions/shotzy@SamkitJain660.github.io && \
@@ -36,8 +42,3 @@ Then restart GNOME Shell and enable the extension:
 gnome-extensions enable shotzy@SamkitJain660.github.io
 ```
 
----
-
-### GNOME Extensions Portal
-NOTE: current version on extension portal does not have QR scanning, that is under review for now.
-> https://extensions.gnome.org/extension/9707/shotzy/ 
