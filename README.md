@@ -6,7 +6,7 @@ Image search on Google Lens, OCR and QR scan directly from the built-in GNOME Sc
 
 ## Installation
 
-### Dependency
+### Dependencies:
 Install **Tesseract OCR** and **zbar-tools** before proceeding
 (if you wish to use OCR / QR scanning):
 ```bash
