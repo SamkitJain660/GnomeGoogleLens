@@ -26,9 +26,6 @@ Shotzy detects installed OCR languages from `/usr/share/tessdata`.
 
 ### GNOME Extensions Portal
 > https://extensions.gnome.org/extension/9707/shotzy/
-
-NOTE: language support is currently under review on official portal, to use that install this manually.
-
 ---
 
 ### Manual Install
