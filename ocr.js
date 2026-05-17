@@ -537,10 +537,13 @@ export class ScreenshotOCRController {
             12,
             Math.min(global.stage.width - menuWidth - 12, Math.round(centerX - menuWidth / 2))
         );
-        const y = Math.max(
-            12,
-            Math.round(selection.y - menuHeight - 12)
-        );
+
+        // Place below the selection; fall back to above if no room below.
+        const belowY = Math.round(selection.y + selection.height + 12);
+        const aboveY = Math.round(selection.y - menuHeight - 12);
+        const y = belowY + menuHeight <= global.stage.height - 12
+            ? belowY
+            : Math.max(12, aboveY);
 
         this._copyMenu.set_position(x, y);
         this._copyMenu.visible = true;
